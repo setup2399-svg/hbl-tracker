@@ -1,0 +1,27 @@
+name: Daily HBL Refresh
+
+on:
+  schedule:
+    - cron: '0 16 * * *' # Triggers daily at 4:00 PM UTC (9:00 PM Pakistan Time)
+  workflow_dispatch: # Allows you to run it manually via mobile anytime
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Scraping Tools
+      run: pip install beautifulsoup4 requests
+    - name: Run Tracker Update
+      run: python tracker.py
+    - name: Deploy Live Changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@://github.com'
+        git add index.html
+        git commit -m "Automated daily NAV refresh" || exit 0
+        git push
